@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 # The hook should exit with non-zero status after issuing an appropriate 
 # message if it wants to stop the commit.
 #   ==> Redirect stdout to stderr
