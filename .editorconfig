@@ -7,7 +7,7 @@ root = true
 end_of_line = lf
 insert_final_newline = true
 charset = utf-8
-trim_trailing_whitespace = True
+trim_trailing_whitespace = true
 
 # 4 space indentation
 # Max line lenghth as specified in PEP8
