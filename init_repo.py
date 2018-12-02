@@ -61,6 +61,7 @@ if yn.lower() != 'y':
 
 import os
 import sys
+
 # Will not run if Python version requirement is not met
 try:
     assert sys.version_info >= (3, 5)
@@ -87,7 +88,6 @@ dependencies = [
     'termcolor'
 ]
 
-# just doing some lazy imports, don't hate me
 print("Initializing dependencies ...")
 print("This may take a while.")
 print('------------------------')
