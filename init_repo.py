@@ -296,6 +296,8 @@ def init_editorconfig(ec_url):
             print(relax, colored("https://editorconfig.org", 'cyan'))
         else:
             editorconfig_plugin = True
+            # disable whitespace pacakge to resolve styling conflicts
+            sp.run('apm disable whitespace', stdout=sp.PIPE, shell=True)
             print(colored('\nSuccess:', 'green'), 'EditorConfig configured!')
             print('NOTE: To use EditorConfig with other IDEs, visit',
                   colored("https://editorconfig.org\n", 'cyan'))
