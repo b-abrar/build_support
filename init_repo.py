@@ -156,9 +156,9 @@ flags = {
 
 def get_home_dir():
     """
-     Obtain HOME directory of the windows system.
+     Obtain HOME directory of the Windows system.
      On Windows, shell=True must be used for shell-intergrated
-     processes However, it is vulnerable to shell injection
+     processes. However, it is vulnerable to shell injection
      from untrusted commands.
 
      The output from subprocess
@@ -190,6 +190,7 @@ def create_template_dir():
     command = sp.run(mkd, stdout=sp.PIPE, shell=True)
     if command.returncode != 1:
         sys.stdout.write(colored('Done\n', 'green' ),msg)
+        sys.stdout.flush()
     else:
         msg = "Git template directory exists." + \
             " Using exsisting directory. \n"
