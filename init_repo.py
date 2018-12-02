@@ -135,7 +135,7 @@ print('------------------------')
 print(colored('Done', 'green'))
 sleep(0.2)
 
-# visual confirmating of passing version requirement
+# visual confirmation of passing version requirement
 # actual test is done at top of file
 sys.stdout.write('\nChecking Python Verison ... ')
 sys.stdout.flush()
