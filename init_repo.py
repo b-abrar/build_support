@@ -96,16 +96,16 @@ print('------------------------')
 reqs = sp.check_output([sys.executable, '-m', 'pip', 'freeze'])
 installed_packages = [r.decode().split('==')[0] for r in reqs.split()]
 
+# upgrade pip to use the dependency list propely
+print("Upgrading pip ...")
+sp.run("python -m pip install --upgrade pip")
+
 # install all packages that aren't installed
 for pkg in dependencies:
     if pkg not in installed_packages:
         print('Installing {}'.format(pkg))
         pkg_cmd = "pip install " + pkg
         sp.run(pkg_cmd)
-
-# upgrade pip to use the dependency list propely
-print("Upgrading pip ...")
-sp.run("python -m pip install --upgrade pip")
 
 # msgpack may not be available after a fresh python installation
 # no need to import it however
