@@ -96,16 +96,16 @@ print('------------------------')
 reqs = sp.check_output([sys.executable, '-m', 'pip', 'freeze'])
 installed_packages = [r.decode().split('==')[0] for r in reqs.split()]
 
-# upgrade pip to use the dependency list propely
-print("Upgrading pip ...")
-sp.run("python -m pip install --upgrade pip")
-
 # install all packages that aren't installed
 for pkg in dependencies:
     if pkg not in installed_packages:
         print('Installing {}'.format(pkg))
         pkg_cmd = "pip install " + pkg
         sp.run(pkg_cmd)
+
+# upgrade pip to use the dependency list propely
+print("Upgrading pip ...")
+sp.run("python -m pip install --upgrade pip")
 
 # msgpack may not be available after a fresh python installation
 # no need to import it however
@@ -215,13 +215,13 @@ def dl_file(url, **kwargs):
         sys.stdout.flush()
         # errors related to internet connectivity
     except(NewConnectionError, MaxRetryError, ConnectionError):
-        error_msg = "Fatal: Failed to send request to URL." + \
+        error_msg = "Failed to send request to URL." + \
         " Check your internet connection and try again."
-        print(error_msg, file=sys.stderr)
+        print(colored('\rFatal:', 'red'), error_msg, file=sys.stderr)
         raise SystemExit(1)
         # error related to HTTP responses
     if response.status_code != 200:
-        print("Fatal: HTTP Error {})."
+        print(colored("Fatal:", 'red'), "HTTP Error {})."
         .format(response.status_code), file=sys.stderr)
         print("Try setting up your repo manually or contact repo admin.",
         file=sys.stderr)
