@@ -19,9 +19,9 @@ Hello JANA Developer!
 
 You are about to:
     - Configure this repository to use custom JANA git hooks.
-    - Enforce JANA's forking workflow on to your development.
     - Initialize all dependencies required for J-TIMP development.
-    - Enforce PEP8 styling to any new code written for this repo.
+    - Enforce JANA's forking workflow on to your development.
+    - Enforce PEP8 styling on any new code written for this repo.
 
 
 Hope you're okay with that. Why am I kidding, you have to be okay with it.
@@ -96,6 +96,11 @@ print('------------------------')
 reqs = sp.check_output([sys.executable, '-m', 'pip', 'freeze'])
 installed_packages = [r.decode().split('==')[0] for r in reqs.split()]
 
+# msgpack may not be available after a fresh python installation
+# no need to import it however, it's required for pip to work
+print("Updrading msgpack ...")
+sp.run("pip install --upgrade msgpack")
+
 # upgrade pip to use the dependency list propely
 print("Upgrading pip ...")
 sp.run("python -m pip install --upgrade pip")
@@ -106,11 +111,6 @@ for pkg in dependencies:
         print('Installing {}'.format(pkg))
         pkg_cmd = "pip install " + pkg
         sp.run(pkg_cmd)
-
-# msgpack may not be available after a fresh python installation
-# no need to import it however
-print("Updrading msgpack ...")
-sp.run("pip install --upgrade msgpack")
 
 from requests import (
     get,
@@ -187,12 +187,16 @@ def create_template_dir():
     mkd = "mkdir " + hook_dir
     sys.stdout.write("Creating git template directory ...\n")
     sys.stdout.flush()
-    command = sp.run(mkd, stdout=sp.PIPE, shell=True)
+    command = sp.run(mkd, stdout=sp.PIPE, stderr=sp.PIPE, shell=True)
     if command.returncode != 1:
-        sys.stdout.write(colored('Done\n', 'green' ),msg)
+        sys.stdout.write(colored('Done', 'green' ))
+        sys.stdout.flush()
+        print('\n')
     else:
-        msg = "Git template directory exists." + \
-            " Using exsisting directory. \n"
+        tp_dir = os.path.dirname(hook_dir)
+        msg = "Git template already directory exists in\n" + \
+        "         " + tp_dir + "\n         " + \
+            "Using exsisting directory.\n"
         print(colored('Warning:', 'yellow'), msg)
 
 
@@ -257,19 +261,21 @@ def init_editorconfig(ec_url):
         print("No existing .editorconfig file found.")
         print('Fetching .editorconfig file from build_support.')
         dl_file(ec_url, file='.editorconfig')
-        print('Success: initialized .editorconfig into {}\n'
+        print(colored('Success:', 'green'),'Initialized .editorconfig into {}\n'
               .format(os.getcwd()))
-    # if editorconfig file already exists
-    print("Repository is already initialized with .editorconfig. Skipping.\n")
+    else: # if editorconfig file already exists
+        print("Repository is already initialized with .editorconfig. Skipping.\n")
     sleep(0.5)
+    
     # Check if Atom is installed
     print("Searching for an instance of Atom Text Editor installation ...")
     sleep(0.5)
-    check = sp.run("atom -v", stdout=sp.PIPE, shell=True)
+    check = sp.run("atom -v", stdout=sp.PIPE, stderr=sp.PIPE, shell=True)
     if check.returncode == 0:
         print(colored("Atom Text Editor installation found.", "green"))
         sleep(0.2)
-        # install editorconfig plugin for atom
+       
+       # install editorconfig plugin for atom
         print("\nInstalling EditorConfig plugin for Atom Text Editor ...")
         print("Note: If progress bar is idle for more than 30 seconds,",
               "hit Ctrl-C once to continue.")
@@ -293,7 +299,7 @@ def init_editorconfig(ec_url):
             print("Warning: Failed to install EditorConfig plugin for Atom",
                   file=sys.stderr)
             relax = "That's okay. You can manually install it afterwards from"
-            print(relax, colored("https://editorconfig.org", 'cyan'))
+            print(relax, colored("https://editorconfig.org\n", 'cyan'))
         else:
             editorconfig_plugin = True
             # disable whitespace pacakge to resolve styling conflicts
@@ -303,11 +309,12 @@ def init_editorconfig(ec_url):
                   colored("https://editorconfig.org\n", 'cyan'))
     else:
         msg = "Atom is not installed on this computer.\n" + \
-        "Automatic editorconfig setup will not take place."
+        "Automatic editorconfig setup will not take place.\n"
         print(colored(msg, 'yellow'))
+        sleep(0.2)
         msg = "Note: To install EditorConfig plugin for your preferred " + \
             "text editor, visit "
-        print(msg, colored("https://editorconfig.org", 'cyan'))
+        print(msg, colored("https://editorconfig.org\n", 'cyan'))
 
 
 def add_upstream_remote():
@@ -377,9 +384,9 @@ def add_upstream_remote():
         print('        {}\n\n' .format(jana_remote))
     # Unknwon error. Stop script
     else:
-        error_msg = "    Warning: Could not set upstream remote." + \
+        error_msg = "Could not set upstream remote." + \
             " You should set it manually to be the JANA repository"
-        print(error_msg, stdout=sys.stderr)
+        print(colored("Warning:", "yellow"), error_msg, file=sys.stderr)
 
 
 def init_all(url, ec_url):
@@ -452,6 +459,6 @@ if __name__ == '__main__':
     init_all(hook_url, ec_url)
 
     print('### TIMP REQUIREMENTS INSTALLATION ###')
-    print("Repo initialized.\nNow running install_requirements.py ...\n")
+    print("I'll call the install_requirements.py script that is already in TIMP,\nbut that takes a minute, so skipping that for demo ...\n")
 
-    print("...You are all set!... (This is a lazy message, I'll update it with a status table later)")
+    print("...You are all set!... \n(This can be updated it with a status table later, also link for documentation on hook interaction will be added)")
