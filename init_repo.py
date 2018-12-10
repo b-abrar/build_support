@@ -98,7 +98,7 @@ installed_packages = [r.decode().split('==')[0] for r in reqs.split()]
 
 # msgpack may not be available after a fresh python installation
 # no need to import it however, it's required for pip to work
-print("Updrading msgpack ...")
+print("Upgrading msgpack ...")
 sp.run("pip install --upgrade msgpack")
 
 # upgrade pip to use the dependency list propely
