@@ -1,58 +1,49 @@
-"""Requirement : python version > Python 3.5
-@author:co-op6 b-abrar
-TO-DO:
--search for .git dir in current dir
--setup hooks
--setup editorconfig
--set upstream remote
-    - git config --get remote.origin.url
--stop clones of actual jana repo
--add ssh support
--progress bar
--print_status
-"""
+"""Requirement : python version > Python 3.5"""
 doc = \
-"""
-##########################################################################
+    """
+##############################################################################
 
-Hello JANA Developer!
+    Hello JANA Developer!
 
-You are about to:
-    - Configure this repository to use custom JANA git hooks.
-    - Initialize all dependencies required for J-TIMP development.
-    - Enforce JANA's forking workflow on to your development.
-    - Enforce PEP8 styling on any new code written for this repo.
-
-
-Hope you're okay with that. Why am I kidding, you have to be okay with it.
-In any case, if you dont like the hooks, just use the '--no-verify' flag
-on your commits to bypass them. But try not to be too smart,
+    You are about to:
+        - Configure this repository to use custom JANA git hooks.
+        - Initialize all dependencies required for J-TIMP development.
+        - Enforce JANA's forking workflow on to your development.
+        - Enforce PEP8 styling on any new code written for this repo.
 
 
-I am watching.
+    Hope you're okay with that. Why am I kidding, you have to be okay with it.
+    In any case, if you dont like the hooks, just use the '--no-verify' flag
+    on your commits to bypass them. But try not to be too smart,
 
 
-Git hooks are awesome. They can do all sorts of things on your behalf:
-   - Scan for any accidental hard tabs you placed in the src files
-   - Warn you about any binary file being commiting to the repo.
-   - Notify you about any unintentional file mode changes. (POSIX)
-   - Stop you from commiting files that are unusually large for the repo.
-
-Basically they block the most common types of undesired commits.
+    I am watching.
 
 
-In addtion to custom hooks, I'll take the honor of:
-    - setting your upstream to the proper JANA repository
-    - setting up your styling to be consitent with JANA style guide
+    Git hooks are awesome. They can do all sorts of things on your behalf:
+       - Scan for any accidental hard tabs you placed in the src files
+       - Warn you about any binary file being commiting to the repo.
+       - Notify you about any unintentional file mode changes. (POSIX)
+       - Stop you from commiting files that are unusually large for the repo.
+
+    Basically they block the most common types of undesired commits.
 
 
-Also, this is a completely SSH friendly script.
-Hoping to see you at work. Just press 'y' below and we're good to go.
+    In addtion to custom hooks, I'll take the honor of:
+        - setting your upstream to the proper JANA repository
+        - setting up your styling to be consitent with JANA style guide
 
-PS: I'll install some dependencies first, that may take a minute.
 
-##########################################################################
-"""
+    Also, this is a completely SSH friendly script.
+    Hoping to see you at work. Just press 'y' below and we're good to go.
+
+    PS: I'll install some dependencies first, that may take a minute.
+    Also, you are encouraged to use Anaconda Prompt for python development.
+    However, if you are using PowerShell with python in your PATH, you will
+    need to run this script as administrator.
+
+##############################################################################
+    """
 # start script on user command
 print(doc)
 yn = input("Proceed ([y]/n)? ")
@@ -139,18 +130,15 @@ sleep(0.2)
 # actual test is done at top of file
 sys.stdout.write('\nChecking Python Verison ... ')
 sys.stdout.flush()
-sleep(0.5)
+sleep(0.3)
 sys.stdout.write(colored('Done\n', 'green'))
 sys.stdout.flush()
-sleep(0.5)
+sleep(0.3)
 
-# state flags
+# state flags for soft errors
 flags = {
-    'python_version': True,
-    'atom_installed': False,
-    'editorconfig_plugin': False,
-    'correct_repo': True,
-    'remote_added': False,
+    'editorconfig_plugin': True,
+    'upstream_remote': True,
 }
 
 
@@ -189,13 +177,13 @@ def create_template_dir():
     sys.stdout.flush()
     command = sp.run(mkd, stdout=sp.PIPE, stderr=sp.PIPE, shell=True)
     if command.returncode != 1:
-        sys.stdout.write(colored('Done', 'green' ))
+        sys.stdout.write(colored('Done', 'green'))
         sys.stdout.flush()
         print('\n')
     else:
         tp_dir = os.path.dirname(hook_dir)
         msg = "Git template already directory exists in\n" + \
-        "         " + tp_dir + "\n         " + \
+              "         " + tp_dir + "\n         " + \
             "Using exsisting directory.\n"
         print(colored('Warning:', 'yellow'), msg)
 
@@ -220,15 +208,15 @@ def dl_file(url, **kwargs):
         # errors related to internet connectivity
     except(NewConnectionError, MaxRetryError, ConnectionError):
         error_msg = "Failed to send request to URL." + \
-        " Check your internet connection and try again."
+                    " Check your internet connection and try again."
         print(colored('\rFatal:', 'red'), error_msg, file=sys.stderr)
         raise SystemExit(1)
         # error related to HTTP responses
     if response.status_code != 200:
-        print(colored("Fatal:", 'red'), "HTTP Error {})."
-        .format(response.status_code), file=sys.stderr)
+        print(colored("\rFatal:", 'red'), "HTTP Error ({})."
+              .format(response.status_code), file=sys.stderr)
         print("Try setting up your repo manually or contact repo admin.",
-        file=sys.stderr)
+              file=sys.stderr)
         raise SystemExit(1)
 
     # Write response to file
@@ -248,34 +236,36 @@ def dl_file(url, **kwargs):
         with open(file_name, "wb") as file:
             file.write(response.content)
     # delays for visual consistency
-    sleep(0.5)
+    sleep(0.3)
     sys.stdout.write(colored("Done", 'green'))
     sys.stdout.flush()
     print('\n')
 
+
 def init_editorconfig(ec_url):
     """Initialize editorconfig if it doesn't exist"""
+    global flags
     print("Searching for an exisiting .editorconfig in repo root ...")
     if not os.path.isfile(".editorconfig"):
         # Then download the editorconfig
         print("No existing .editorconfig file found.")
         print('Fetching .editorconfig file from build_support.')
         dl_file(ec_url, file='.editorconfig')
-        print(colored('Success:', 'green'),'Initialized .editorconfig into {}\n'
+        print(colored('Success:', 'green'), 'Initialized .editorconfig into {}\n'
               .format(os.getcwd()))
-    else: # if editorconfig file already exists
+    else:  # if editorconfig file already exists
         print("Repository is already initialized with .editorconfig. Skipping.\n")
-    sleep(0.5)
-    
+    sleep(0.3)
+
     # Check if Atom is installed
     print("Searching for an instance of Atom Text Editor installation ...")
-    sleep(0.5)
+    sleep(0.3)
     check = sp.run("atom -v", stdout=sp.PIPE, stderr=sp.PIPE, shell=True)
     if check.returncode == 0:
         print(colored("Atom Text Editor installation found.", "green"))
         sleep(0.2)
-       
-       # install editorconfig plugin for atom
+
+        # install editorconfig plugin for atom
         print("\nInstalling EditorConfig plugin for Atom Text Editor ...")
         print("Note: If progress bar is idle for more than 30 seconds,",
               "hit Ctrl-C once to continue.")
@@ -283,7 +273,7 @@ def init_editorconfig(ec_url):
         # show some progress before install begins
         for i in range(2):
             bar.next()
-            sleep(2)
+            sleep(1.5)
         sys.stdout.flush()
         install = sp.run("apm install editorconfig",
                          stdout=sp.PIPE, shell=True)
@@ -300,8 +290,8 @@ def init_editorconfig(ec_url):
                   file=sys.stderr)
             relax = "That's okay. You can manually install it afterwards from"
             print(relax, colored("https://editorconfig.org\n", 'cyan'))
+            flags['editorconfig_plugin'] = False
         else:
-            editorconfig_plugin = True
             # disable whitespace pacakge to resolve styling conflicts
             sp.run('apm disable whitespace', stdout=sp.PIPE, shell=True)
             print(colored('\nSuccess:', 'green'), 'EditorConfig configured!')
@@ -309,17 +299,19 @@ def init_editorconfig(ec_url):
                   colored("https://editorconfig.org\n", 'cyan'))
     else:
         msg = "Atom is not installed on this computer.\n" + \
-        "Automatic editorconfig setup will not take place.\n"
+              "Automatic editorconfig setup will not take place.\n"
         print(colored(msg, 'yellow'))
         sleep(0.2)
         msg = "Note: To install EditorConfig plugin for your preferred " + \
             "text editor, visit "
         print(msg, colored("https://editorconfig.org\n", 'cyan'))
+        flags['editorconfig_plugin'] = False
 
 
 def add_upstream_remote():
     """Find out the JANA url of the current repository
     and add it to the upstream. Works for both HTTPS and SSH"""
+    global flags
     cmd = 'git config --get remote.origin.url'
     # [:-1] is used to remove carriage return
     sys.stdout.write("Configuring upstream to be JANA remote ...\n")
@@ -344,8 +336,8 @@ def add_upstream_remote():
         # if using main repo instead of fork, throw error
         if fork[-2] == 'JANA-Technology':
             msg = "You are using a clone of the JANA repository." + \
-            " You must clone a fork of the JANA repository instead."
-            print(colored('Fatal:', 'red'), msg, file=sys.stderr)
+                  " You must clone a fork of the JANA repository instead."
+            print(colored('\rFatal:', 'red'), msg, file=sys.stderr)
             raise SystemExit(1)
         fork[-2] = 'JANA-Technology'
         jana_remote = '/'.join(fork)
@@ -357,8 +349,8 @@ def add_upstream_remote():
         fork_inner = fork[0].split(':')
         if fork_inner[1] == "JANA-Technology":
             msg = "You are using a clone of the JANA repository." + \
-            " You must clone a fork of the JANA repository instead."
-            print(colored('Fatal:', 'red'), msg, file=sys.stderr)
+                  " You must clone a fork of the JANA repository instead."
+            print(colored('\rFatal:', 'red'), msg, file=sys.stderr)
             raise SystemExit(1)
         fork_inner[1] = "JANA-Technology"
         fork[0] = ':'.join(fork_inner)
@@ -369,7 +361,7 @@ def add_upstream_remote():
     add_remote = sp.run(cmd, stdout=sp.PIPE)
     if add_remote.returncode == 0:
         print(colored('Success:', 'green'),
-                "Set upstream as JANA repository:\n")
+              "Set upstream as JANA repository:\n")
         print('        {}' .format(jana_remote))
     # if upstream remote already exists, overwrite it
     elif add_remote.returncode == 128:
@@ -380,13 +372,14 @@ def add_upstream_remote():
         cmd = 'git remote set-url upstream ' + jana_remote
         sp.run(cmd, stdout=sp.PIPE)
         msg = "Updated upstream remote to JANA repository.\n"
-        print(colored('Success:', 'green'),msg)
+        print(colored('Success:', 'green'), msg)
         print('        {}\n\n' .format(jana_remote))
     # Unknwon error. Stop script
     else:
         error_msg = "Could not set upstream remote." + \
             " You should set it manually to be the JANA repository"
         print(colored("Warning:", "yellow"), error_msg, file=sys.stderr)
+        flags['upstream_remote'] = False
 
 
 def init_all(url, ec_url):
@@ -395,20 +388,20 @@ def init_all(url, ec_url):
     # check if current dir is a git repository
     if not os.path.isdir(".git"):
         error_msg = "Not a git repository." + \
-        " Run script from the root of a git repository."
-        print(colored('Fatal:', 'red'), error_msg)
+                    " Run script from the root of a git repository."
+        print(colored('\rFatal:', 'red'), error_msg)
         raise SystemExit(1)
 
     # create the git template directory
     print('### TEMPLATE DIRECTORY SET UP ###')
     create_template_dir()
-    sleep(1)
+    sleep(0.5)
 
     # download git hooks from url
     print('### HOOK INITIALIZATION ###')
     print("Fetching pre-commit hooks from build_support ...")
     dl_file(url, file='pre-commit')
-    sleep(1)
+    sleep(0.5)
 
     # Set the newly created the git_template as the template dir
     cmd = "git config --global init.templatedir " + get_template_dir()
@@ -423,7 +416,7 @@ def init_all(url, ec_url):
         cmd = r"del .git\hooks\pre-commit"
         sp.run(cmd, shell=True)
         sys.stdout.write(colored('Done', 'green'))
-        sleep(0.5)
+        sleep(0.3)
     # Replace existing hooks with newer ones
     # and reinitialize repository
     cmd = "git init"
@@ -431,27 +424,38 @@ def init_all(url, ec_url):
     if git_init.returncode == 0:
         print("\nReinitialized existing git repository in\n\n", "    {} \n\n"
               .format(os.getcwd()))
-        sleep(0.5)
+        sleep(0.3)
 
     # add upstream for the repository
     print("### SETTING UPSTREAM REMOTE ###")
     add_upstream_remote()
-    sleep(0.5)
+    sleep(0.3)
 
     # init editorconfig
     print("### INITIALIZING EDITORCONFIG ###")
     init_editorconfig(ec_url)
-    sleep(0.5)
+    sleep(0.3)
 
 
 def print_status(flags):
     """Final status message"""
-    pass
+    soft_error = any(val is False for val in flags.values())
+    if soft_error is True:
+        msg = "Initilization complete.\n" + \
+              "However, the following couldn't be installed" + \
+              " and thus, needs to be installed manually: "
+        print(msg)
+        for k, v in flags.items():
+            if v is False:
+                print(k)
+    else:
+        print("...You are all set!...")
+        print("Read the documentation for help with git hooks.")
 
 
 if __name__ == '__main__':
 
-    print("\nReading System Variables and initializing script ...\n" )
+    print("\nReading System Variables and initializing script ...\n")
     # provide time buffer to cancel script
 
     hook_url = 'https://raw.githubusercontent.com/b-abrar/build_support/master/pre-commit.pl'
@@ -460,5 +464,4 @@ if __name__ == '__main__':
 
     print('### TIMP REQUIREMENTS INSTALLATION ###')
     print("I'll call the install_requirements.py script that is already in TIMP,\nbut that takes a minute, so skipping that for demo ...\n")
-
-    print("...You are all set!... \n(This can be updated it with a status table later, also link for documentation on hook interaction will be added)")
+    print_status(flags)
